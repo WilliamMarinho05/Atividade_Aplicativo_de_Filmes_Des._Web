@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
+import { ThemeContext } from "../contexts/ThemeContext";
 
-// Array de dados mockados simulando a resposta de uma API de filmes (como a OMDb)
-// Array de dados mockados com URLs de imagens 100% atualizadas e estáveis
+// Array de dados mockados com URLs estáveis
 const FILMES_MOCK = [
   {
     imdbID: "tt0111161",
     Title: "Um Sonho de Liberdade",
     Year: "1994",
-    Poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&auto=format&fit=crop&q=60" // Imagem genérica de cinema de alta qualidade
+    Poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&auto=format&fit=crop&q=60"
   },
   {
     imdbID: "tt0468569",
@@ -21,69 +21,48 @@ const FILMES_MOCK = [
 export default function Home() {
   const [filmes, setFilmes] = useState([]);
   const [carregando, setCarregando] = useState(true);
+  const { tema } = useContext(ThemeContext);
 
+  // O bloco essencial que estava faltando no seu arquivo:
   useEffect(() => {
-    // Simulando uma requisição de API com um atraso de 1 segundo (Simula o Fetch)
     const buscarFilmes = setTimeout(() => {
-      setFilmes(FILMES_MOCK);
+      setFilmes(FILMES_MOCK); // Aqui nós jogamos os filmes no estado!
       setCarregando(false);
     }, 1000);
 
-    // Função de limpeza (cleanup) do useEffect
     return () => clearTimeout(buscarFilmes);
   }, []);
 
-  // Renderização Condicional: exibe mensagem enquanto os dados não chegam
+  // Renderização condicional para dar um feedback bacana enquanto carrega
   if (carregando) {
-    return <h3>🎬 Carregando catálogo de filmes...</h3>;
+    return <h3 style={{ padding: "2rem" }}>🎬 Carregando catálogo de filmes...</h3>;
   }
 
   return (
     <div>
       <h2 style={{ marginBottom: "1.5rem" }}>🍿 Catálogo de Filmes</h2>
       
-      {/* Grid de Cards dos Filmes */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-        gap: "20px"
-      }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "20px" }}>
         {filmes.map((filme) => (
           <div 
             key={filme.imdbID} 
             style={{
-              border: "1px solid #ccc",
+              border: tema === "claro" ? "1px solid #ccc" : "1px solid #444",
+              backgroundColor: tema === "claro" ? "#fff" : "#1e1e1e",
               borderRadius: "8px",
               padding: "10px",
               textAlign: "center",
               display: "flex",
               flexDirection: "column",
-              justifyContent: "between"
+              justifyContent: "space-between"
             }}
           >
-            <img 
-              src={filme.Poster} 
-              alt={filme.Title} 
-              style={{ width: "100%", height: "280px", objectFit: "cover", borderRadius: "6px" }}
-            />
+            <img src={filme.Poster} alt={filme.Title} style={{ width: "100%", height: "280px", objectFit: "cover", borderRadius: "6px" }} />
             <h3 style={{ fontSize: "1rem", margin: "10px 0 5px 0" }}>{filme.Title}</h3>
-            <p style={{ fontSize: "0.85rem", color: "#666", margin: "0 0 10px 0" }}>({filme.Year})</p>
             
-            {/* Link dinâmico passando o ID do filme como parâmetro na URL */}
-            <Link 
-              to={`/filme/${filme.imdbID}`}
-              style={{
-                marginTop: "auto",
-                display: "block",
-                padding: "8px",
-                background: "#0275d8",
-                color: "white",
-                textDecoration: "none",
-                borderRadius: "4px",
-                fontWeight: "bold",
-                fontSize: "0.9rem"
-              }}
-            >
+            <p style={{ fontSize: "0.85rem", color: tema === "claro" ? "#666" : "#aaa", margin: "0 0 10px 0" }}>({filme.Year})</p>
+            
+            <Link to={`/filme/${filme.imdbID}`} style={{ marginTop: "auto", display: "block", padding: "8px", background: "#0275d8", color: "white", borderRadius: "4px", fontWeight: "bold", fontSize: "0.9rem" }}>
               Ver Detalhes 👀
             </Link>
           </div>
